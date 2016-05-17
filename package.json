@@ -1,0 +1,27 @@
+{
+	"name": "NodePOC",
+	"version": "0.0.1",
+	"author": "Udit",
+	"private": true,
+	"scripts": 
+	{
+		"start": "node main.js"
+	},
+
+	"dependencies": 
+	{
+		"express": "3.2.6",
+		"jade": "*",
+		"consolidate": "0.10.0",
+		"swig": "1.3.2",
+		"redis": "*",
+		"typescript": "*",
+		"shelljs": "*"
+	},
+
+	"engines": 
+	{
+		"node": "0.12.7",
+		"npm": "2.7.4"
+	}
+}
