@@ -1,15 +1,32 @@
 var express = require('express');
 var http = require('http');
-
+var fs = require("fs");
+var unzip = require('unzip');
 var app = express();
 var port = 3000;
 
 app.get('/demo', function (req, res) {
   
        console.log( "req done");
-       res.end( "Hello word");
+
+var data = "name of files are ";
+       
+fs.createReadStream('C:/nodeDemo/demoFiles.zip').pipe(unzip.Extract({ path: 'C:/nodeDemo/unzipFolder' }));
+
+fs.createReadStream('C:/nodeDemo/demoFiles.zip')
+  .pipe(unzip.Parse())
+  .on('entry', function (entry) {
+    var fileName = entry.path;
+	console.log( fileName);
+    var type = entry.type; // 'Directory' or 'File' 
+    var size = entry.size;
+	data += fileName +" ";
+console.log( data );
+    
+  });
+res.end( data );
   
-})
+});
 
 
 var server = http.createServer(app).listen(process.env.PORT || port, function () {
