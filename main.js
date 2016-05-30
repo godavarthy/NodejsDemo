@@ -9,42 +9,51 @@ var unzip = require('unzip');
 var app = express();
 var port = 3000;
 var filename;
+var resObj;
+
 	var storage =   multer.diskStorage({
 		  destination: function (req, file, callback) {
 		    callback(null, './inFolder');
 		  },
 		  filename: function (req, file, callback) {
-		     filename = file.fieldname + '-' + Date.now();
+		     filename = file.fieldname + '-' + Date.now()+'.zip';
 		    callback(null, filename);
 		  }
 	});
+	var readFolder = function () {
+		var data = "name of files are ";
+			console.log( "incb");
+			var files = fs.readdirSync('./outFolder')
+			console.log( files);
+			for (var i in files){
+				data += files[i] + " ";
+				console.log( data);
+			}
+			resObj.end( data );
+	}
 	var upload = multer({ storage : storage}).single('datafile');
 
-	
-	app.post('/demo',function(req,res){
+	var postUploadHandler = function(req,res){
 		
-		
-	    upload(req,res,function(err) {
-		
+		upload(req,res,function(err) {
+			
 	        if(err) {
 	            return res.end("Error uploading file.");
 	        }
 	        else{
-			console.log( filename);
-	        	var data = "name of files are ";
+				console.log( filename);
+				resObj = res;
+				var unzipExtractor = unzip.Extract({ path: './outFolder' });
 	        	var zipStream = fs.createReadStream('./inFolder/'+filename);       
-	        	zipStream.pipe(unzip.Extract({ path: './outFolder' }));
-
-	        	var files = fs.readdirSync('./outFolder')
-	        	console.log( files);
-	        	for (var i in files){
-	        		data += files[i] + " ";
-	        		console.log( data);
+	        	zipStream.pipe(unzipExtractor);
+	        	console.log( "res process");
+	        	unzipExtractor.on('close', readFolder);
+	        	
+		       
 	        	}
-	        	res.end( data );
-	        }
 	    });
-	});
+	}
+	app.post('/demo',postUploadHandler);
 	
 
 app.set('view engine', 'jade');
