@@ -6,9 +6,11 @@ var multer  =   require('multer');
 var http = require('http');
 var fs = require("fs");
 var unzip = require('unzip');
+var shell = require('shelljs');
 var app = express();
 var port = 3000;
 var filename;
+var outFolder;
 var resObj;
 
 	var storage =   multer.diskStorage({
@@ -17,13 +19,14 @@ var resObj;
 		  },
 		  filename: function (req, file, callback) {
 		     filename = file.fieldname + '-' + Date.now()+'.zip';
+		     outFolder = './outFolder/' + filename;
 		    callback(null, filename);
 		  }
 	});
 	var readFolder = function () {
 		var data = "name of files are ";
 			console.log( "incb");
-			var files = fs.readdirSync('./outFolder')
+			var files = fs.readdirSync(outFolder)
 			console.log( files);
 			for (var i in files){
 				data += files[i] + " ";
@@ -43,7 +46,8 @@ var resObj;
 	        else{
 				console.log( filename);
 				resObj = res;
-				var unzipExtractor = unzip.Extract({ path: './outFolder' });
+				shell.mkdir('-p', outFolder);
+				var unzipExtractor = unzip.Extract({ path: outFolder });
 	        	var zipStream = fs.createReadStream('./inFolder/'+filename);       
 	        	zipStream.pipe(unzipExtractor);
 	        	console.log( "res process");
