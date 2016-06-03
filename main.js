@@ -45,7 +45,7 @@ var resObj;
 			}
 			
 			
-			eventEmitter.emit('pipeResponse');;
+			eventEmitter.emit('pipeZip');
 	}
 	var zipFiles = function () {
 		var output = fs.createWriteStream(outFolder+'/compiledJs.zip');
@@ -65,14 +65,15 @@ var resObj;
 		    { expand: true, cwd: jsFolder, src: ['**'], dest: 'source'}
 		]);
 		archive.finalize();
+		eventEmitter.emit('pipeResponse');
 		
 	}
 	var response = function () {
 		console.log(" before response");
 		resObj.download( outFolder+'/compiledJs.zip' );
 	}
-	eventEmitter.addListener('pipeResponse', zipFiles);
-	eventEmitter.on('pipeResponse', response);
+	eventEmitter.addListener('pipeZip', zipFiles);
+	eventEmitter.addListener('pipeResponse', response);
 	var upload = multer({ storage : storage}).single('datafile');
 
 	var postUploadHandler = function(req,res){
