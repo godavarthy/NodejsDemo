@@ -10,7 +10,9 @@ var unzip = require('unzip');
 var shell = require('shelljs');
 var tsc = require('typescript-compiler');
 var archiver = require('archiver');
+var events = require('events');
 var app = express();
+var eventEmitter = new events.EventEmitter();
 var port = 3000;
 var filename;
 var outFolder;
@@ -41,8 +43,9 @@ var resObj;
 				data += files[i] + " ";
 				console.log( data);
 			}
-			zipFiles();
-			resObj.download( outFolder+'/compiledJs.zip' );
+			
+			
+			eventEmitter.emit('pipeResponse');;
 	}
 	var zipFiles = function () {
 		var output = fs.createWriteStream(outFolder+'/compiledJs.zip');
@@ -62,7 +65,14 @@ var resObj;
 		    { expand: true, cwd: jsFolder, src: ['**'], dest: 'source'}
 		]);
 		archive.finalize();
+		
 	}
+	var response = function () {
+		console.log(" before response");
+		resObj.download( outFolder+'/compiledJs.zip' );
+	}
+	eventEmitter.addListener('pipeResponse', zipFiles);
+	eventEmitter.on('pipeResponse', response);
 	var upload = multer({ storage : storage}).single('datafile');
 
 	var postUploadHandler = function(req,res){
