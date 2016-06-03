@@ -9,10 +9,12 @@ var fs = require("fs");
 var unzip = require('unzip');
 var shell = require('shelljs');
 var tsc = require('typescript-compiler');
+var archiver = require('archiver');
 var app = express();
 var port = 3000;
 var filename;
 var outFolder;
+var jsFolder
 var resObj;
 
 	var storage =   multer.diskStorage({
@@ -30,7 +32,7 @@ var resObj;
 			console.log( "incb");
 			var files = fs.readdirSync(outFolder)
 			console.log( files);
-			var jsFolder = outFolder+'/js';
+			jsFolder = outFolder+'/js';
 			shell.mkdir('-p', jsFolder);
 			for (var i in files){
 				var cmdTxt = outFolder+'/'+files[i];
@@ -39,7 +41,27 @@ var resObj;
 				data += files[i] + " ";
 				console.log( data);
 			}
-			resObj.end( data );
+			zipFiles();
+			resObj.download( outFolder+'/compiledJs.zip' );
+	}
+	var zipFiles = function () {
+		var output = fs.createWriteStream(outFolder+'/compiledJs.zip');
+		var archive = archiver('zip');
+
+		output.on('close', function () {
+		    console.log(archive.pointer() + ' total bytes');
+		    console.log('archiver has been finalized and the output file descriptor has closed.');
+		});
+
+		archive.on('error', function(err){
+		    throw err;
+		});
+
+		archive.pipe(output);
+		archive.bulk([
+		    { expand: true, cwd: jsFolder, src: ['**'], dest: 'source'}
+		]);
+		archive.finalize();
 	}
 	var upload = multer({ storage : storage}).single('datafile');
 
