@@ -18,6 +18,7 @@ var filename;
 var outFolder;
 var jsFolder
 var resObj;
+app.use(express.static(__dirname + '/views'));
 
 	var storage =   multer.diskStorage({
 		  destination: function (req, file, callback) {
@@ -54,6 +55,7 @@ var resObj;
 		output.on('close', function () {
 		    console.log(archive.pointer() + ' total bytes');
 		    console.log('archiver has been finalized and the output file descriptor has closed.');
+			eventEmitter.emit('pipeResponse');
 		});
 
 		archive.on('error', function(err){
@@ -65,7 +67,7 @@ var resObj;
 		    { expand: true, cwd: jsFolder, src: ['**'], dest: 'source'}
 		]);
 		archive.finalize();
-		eventEmitter.emit('pipeResponse');
+		
 		
 	}
 	var response = function () {
@@ -101,7 +103,7 @@ var resObj;
 	
 
 app.set('view engine', 'jade');
-app.get('/index', function(req, res) {
+app.get('/', function(req, res) {
     res.sendfile('test.html', {root: './views' })
 });
 
